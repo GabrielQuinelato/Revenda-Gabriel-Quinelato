@@ -1,0 +1,94 @@
+1. Consulta filtrando com LIKE
+
+Foi realizada uma consulta na tabela de produtos, aplicando um filtro textual utilizando o operador LIKE.
+O objetivo foi identificar produtos cujo nome continha determinada palavra-chave.
+O resultado trouxe todos os registros que atendiam ao critério estabelecido.
+
+2. Execução do EXPLAIN (antes do índice)
+
+Foi utilizado o comando EXPLAIN sobre a consulta anterior.
+O retorno apresentou um plano de execução em que o PostgreSQL utilizou uma varredura sequencial (Seq Scan) na tabela.
+Esse método lê todos os registros, o que pode ser mais lento em tabelas com muitos dados.
+
+3. Criação de um índice
+
+Foi criado um índice sobre a coluna utilizada no filtro da consulta.
+Esse índice tem como objetivo acelerar buscas textuais e melhorar o desempenho da consulta.
+
+4. Execução do EXPLAIN (após o índice)
+
+A consulta filtrada foi executada novamente com o EXPLAIN.
+O plano de execução apresentou diferenças em relação ao anterior:
+
+Em alguns casos, o banco pode passar a usar Index Scan (busca otimizada via índice).
+
+Se a condição do LIKE começar com %, o banco ainda pode manter o Seq Scan.
+A comparação mostrou o impacto direto do índice na performance da consulta.
+
+5. Alteração de coluna VARCHAR para INT
+
+Foi tentada a alteração de uma coluna do tipo VARCHAR para INT.
+O resultado dependeu dos valores armazenados:
+
+Se os dados eram apenas numéricos, a conversão funcionou.
+
+Caso houvesse caracteres não numéricos, ocorreu erro de conversão.
+
+6. Alteração de coluna INT para VARCHAR
+
+Foi alterada uma coluna do tipo INT para VARCHAR.
+Nesse caso, a conversão foi aceita normalmente, já que números podem ser representados como texto.
+O banco armazenou os valores numéricos em formato textual.
+
+7. Criação de usuário administrador
+
+Foi criado um usuário com o nome do proprietário do sistema (joaofrancisco).
+Esse usuário recebeu todas as permissões sobre as tabelas do banco de dados, incluindo leitura, escrita, atualização e exclusão de registros.
+
+8. Criação de usuário colega com restrição
+
+Foi criado um segundo usuário com permissões limitadas:
+
+Apenas consulta (SELECT) em uma tabela específica.
+
+Qualquer tentativa de inserir, alterar ou excluir dados resultou em erro de permissão.
+Esse comportamento foi registrado.
+
+9. Reexecução de testes no usuário colega
+
+Todos os comandos foram reexecutados no usuário limitado:
+
+Consultas simples na tabela permitida funcionaram corretamente.
+
+Consultas em outras tabelas ou comandos de modificação de dados apresentaram erros de acesso.
+A restrição funcionou conforme esperado.
+
+10. Criação de 12 consultas com JOINs
+
+Foram elaboradas 12 consultas envolvendo relacionamentos entre tabelas.
+Cada consulta foi realizada em três versões diferentes:
+
+INNER JOIN: trouxe apenas registros com correspondência nas duas tabelas.
+
+LEFT JOIN: trouxe todos os registros da tabela principal e os correspondentes da secundária.
+
+RIGHT JOIN: trouxe todos os registros da tabela secundária e os correspondentes da principal.
+Foram 4 consultas distintas, cada uma com as três variações de JOIN.
+
+11. Atualização de registros com valores NULL
+
+Alguns registros tiveram colunas atualizadas para valores nulos.
+Isso foi feito para simular situações reais em que informações podem estar ausentes.
+
+12. Reexecução das consultas com JOIN após NULL
+
+As consultas com JOIN foram executadas novamente.
+O comportamento observado foi:
+
+INNER JOIN: ignorou os registros que possuíam valores nulos nas colunas de junção.
+
+LEFT JOIN: preservou todos os registros da tabela principal, mesmo com colunas nulas.
+
+RIGHT JOIN: preservou todos os registros da tabela secundária, mesmo com colunas nulas.
+
+Essa análise demonstrou claramente as diferenças de comportamento entre os tipos de junção.
